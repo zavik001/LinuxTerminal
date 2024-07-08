@@ -1,9 +1,9 @@
 # LinuxTerminal
-LinuxTerminal/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com/
+#LinuxTerminal/
+#├── src/
+#│   ├── main/
+#│   │   └── java/
+#│   │       └── com/
 │   │           └── mycompany/
 │   │               └── myapp/
 │   │                   ├── FileExplorer.java
