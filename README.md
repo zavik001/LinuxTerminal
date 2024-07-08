@@ -1,7 +1,5 @@
 # LinuxTerminal
 
-## Структура проекта
-
 ```
 LinuxTerminal/
 ├── src/
