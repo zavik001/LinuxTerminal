@@ -52,7 +52,7 @@ public class TerminalUI {
         } else {
             textArea.append("Invalid command. Type 'help' for available commands.\n");
         }
-    }
+    }   
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
