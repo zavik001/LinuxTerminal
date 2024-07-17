@@ -126,7 +126,7 @@ public class TerminalUI {
     }
 
     private void executeCommand(String input) {
-        Parser parser = new Parser();
+        Direction parser = new Direction();
         if (parser.parse(input)) {
             String command = parser.getCommandName();
             ArrayList<String> args = parser.getArgs();

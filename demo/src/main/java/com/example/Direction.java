@@ -3,7 +3,7 @@ package com.example;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-public class Parser {
+public class Direction {
     private String commandName;
     private ArrayList<String> args;
 
