@@ -15,6 +15,7 @@ public class TerminalUI {
     public TerminalUI() {
         terminal = new Terminal();
         initialize();
+        terminal.setOutputArea(textArea); // Set the text area for Terminal output
     }
 
     private void initialize() {
