@@ -7,6 +7,10 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class TerminalUI {
     private JFrame frame;
@@ -18,24 +22,27 @@ public class TerminalUI {
 
     public TerminalUI() {
         terminal = new Terminal();
+
+        ImageIcon icon = new ImageIcon("resources/materials/linux.png");
+
         userName = (String) JOptionPane.showInputDialog(
             frame,
             "Enter your name:",
-            "Linux Login",
+            "Login",
             JOptionPane.PLAIN_MESSAGE,
-            null,
+            icon, 
             null,
             "user"
         );
         if (userName == null || userName.isEmpty()) {
             userName = "user";
         }
-        prompt = "┌──(kali㉿" + userName + ")-[~]\n└─$ ";
+        prompt = "┌──(Linux@" + userName + ")-[~#]\n└─$ ";
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame("Terminal");
+        frame = new JFrame("LinuxTerminal");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);  // Center the window
@@ -47,24 +54,29 @@ public class TerminalUI {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(Color.WHITE); // White background
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                g2d.setColor(Color.DARK_GRAY); // Dark gray background
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 0, 0);
             }
         };
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
         textPane = new JTextPane();
         textPane.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        textPane.setBackground(Color.WHITE);  // White background
-        textPane.setForeground(Color.BLACK);  // Black text
-        textPane.setCaretColor(Color.BLACK);  // Black caret
+        textPane.setBackground(Color.BLACK);  // Black background
+        textPane.setForeground(Color.WHITE);  // White text
+        textPane.setCaretColor(Color.WHITE);  // White caret
         textPane.setCaret(new DefaultCaret() {
             {
                 setBlinkRate(500);  // Set caret blink rate for quicker appearance
             }
         });
         textPane.setEditable(true);
-        appendToPane("Приветствую, " + userName + "\n");
+        appendToPane("LinuxTerminal" + "\n" +
+        "Copyright (C)" + "\n" +
+        "Install the latest LinuxTerminal for new features and improvements!" + "\n" +
+        "https://github.com/zavik001/LinuxTerminal" + "\n\n");
+        printIPandTime();
+        appendToPane("Hello, " + userName + "\n");
         appendToPane(prompt);
         commandStart = textPane.getDocument().getLength();
 
@@ -92,6 +104,12 @@ public class TerminalUI {
                     commandStart = textPane.getDocument().getLength();
                     e.consume();
                 }
+
+                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                    if (textPane.getCaretPosition() <= commandStart) {
+                        e.consume();
+                    }
+                }
             }
         });
 
@@ -103,6 +121,20 @@ public class TerminalUI {
 
         // Focus the text area to start typing immediately
         textPane.requestFocusInWindow();
+    }
+
+    private void printIPandTime() {
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            appendToPane("IP: " + ip.getHostAddress() + "\n");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedNow = now.format(formatter);
+        appendToPane("date and time: " + formattedNow + "\n");
     }
 
     private void appendToPane(String text) {
