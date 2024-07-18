@@ -59,6 +59,7 @@ public class Terminal {
 
     public void setOutputArea(JTextPane textPane) {
         this.textPane = textPane;
+        
     }
 
     public void setTerminalUI(TerminalUI terminalUI) {

@@ -12,6 +12,7 @@
                 │   ├───java
                 │   │   └───com
                 │   │       └───example
+                │   │               CommandHistory.java
                 │   │               Direction.java
                 │   │               Terminal.java
                 │   │               TerminalUI.java
