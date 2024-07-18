@@ -6,11 +6,11 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class TerminalUI {
     private JFrame frame;
@@ -19,20 +19,22 @@ public class TerminalUI {
     private String userName;
     private String prompt;
     private int commandStart;
+    private CommandHistory commandHistory;
 
     public TerminalUI() {
         terminal = new Terminal();
+        commandHistory = new CommandHistory();
 
         ImageIcon icon = new ImageIcon("resources/materials/linux.png");
 
         userName = (String) JOptionPane.showInputDialog(
-            frame,
-            "Enter your name:",
-            "Login",
-            JOptionPane.PLAIN_MESSAGE,
-            icon, 
-            null,
-            "user"
+                frame,
+                "Enter your name:",
+                "Login",
+                JOptionPane.PLAIN_MESSAGE,
+                icon,
+                null,
+                "user"
         );
         if (userName == null || userName.isEmpty()) {
             userName = "user";
@@ -72,9 +74,9 @@ public class TerminalUI {
         });
         textPane.setEditable(true);
         appendToPane("LinuxTerminal" + "\n" +
-        "Copyright (C)" + "\n" +
-        "Install the latest LinuxTerminal for new features and improvements!" + "\n" +
-        "https://github.com/zavik001/LinuxTerminal" + "\n\n");
+                "Copyright (C)" + "\n" +
+                "Install the latest LinuxTerminal for new features and improvements!" + "\n" +
+                "https://github.com/zavik001/LinuxTerminal" + "\n\n");
         printIPandTime();
         appendToPane("Hello, " + userName + "\n");
         appendToPane(prompt);
@@ -102,6 +104,9 @@ public class TerminalUI {
                     executeCommand(input);
                     appendToPane(prompt);
                     commandStart = textPane.getDocument().getLength();
+                    e.consume();
+                } else if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    handleArrowKeys(e);
                     e.consume();
                 }
 
@@ -158,6 +163,8 @@ public class TerminalUI {
     }
 
     private void executeCommand(String input) {
+        addToCommandHistory(input); 
+
         Direction parser = new Direction();
         if (parser.parse(input)) {
             String command = parser.getCommandName();
@@ -165,6 +172,56 @@ public class TerminalUI {
             terminal.chooseCommandAction(command, args);
         } else {
             appendToPane("Invalid command. Type 'help' for available commands.\n");
+        }
+    }
+
+    private void handleArrowKeys(KeyEvent e) {
+        int caretPosition = textPane.getCaretPosition();
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            String previousCommand = getPreviousCommandFromHistory();
+            updateTextPaneWithCommand(previousCommand);
+        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            String nextCommand = getNextCommandFromHistory();
+            updateTextPaneWithCommand(nextCommand);
+        }
+    }
+
+    private void updateTextPaneWithCommand(String command) {
+        try {
+            Document doc = textPane.getDocument();
+            doc.remove(commandStart, doc.getLength() - commandStart);
+            doc.insertString(commandStart, command, null);
+            textPane.setCaretPosition(doc.getLength());
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+    }
+    
+
+    private void addToCommandHistory(String command) {
+        commandHistory.add(command);
+    }
+
+    private String getPreviousCommandFromHistory() {
+        return commandHistory.getPreviousCommand();
+    }
+
+    private String getNextCommandFromHistory() {
+        return commandHistory.getNextCommand();
+    }
+
+    public void close() {
+        closeWindow();
+    }
+
+    private void closeWindow() {
+        frame.dispose();
+    }
+
+    public void exit() {
+        appendToPane("Exiting terminal...");
+        if (frame != null) {
+            frame.dispose();
         }
     }
 
