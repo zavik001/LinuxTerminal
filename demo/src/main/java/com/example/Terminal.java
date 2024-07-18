@@ -12,54 +12,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Terminal {
     private String currentDirectory = System.getProperty("user.dir");
     private JTextPane textPane;
     private TerminalUI terminalUI;
-    private ArrayList<String> commandHistory = new ArrayList<>();
-    private int historyIndex = -1;
-
-    private void addToCommandHistory(String command) {
-        commandHistory.add(command);
-        historyIndex = commandHistory.size(); 
-    }
-
-    private String getPreviousCommand() {
-        if (historyIndex > 0) {
-            historyIndex--;
-        }
-        return commandHistory.get(historyIndex);
-    }
-
-    private String getNextCommand() {
-        if (historyIndex < commandHistory.size() - 1) {
-            historyIndex++;
-        } else if (historyIndex == commandHistory.size() - 1) {
-            historyIndex = commandHistory.size();
-            return "";
-        }
-        return commandHistory.get(historyIndex);
-    }
-
-    private void executeCommand(String input) {
-        addToCommandHistory(input); 
-
-        Direction parser = new Direction();
-        if (parser.parse(input)) {
-            String command = parser.getCommandName();
-            addToCommandHistory(command);
-            ArrayList<String> args = parser.getArgs();
-            chooseCommandAction(command, args);
-        } else {
-            printToOutput("Invalid command. Type 'help' for available commands.\n");
-        }
-    }
+    private CommandHistory allCommandHistory;
 
     public void setOutputArea(JTextPane textPane) {
         this.textPane = textPane;
-        
+
+    }
+
+    public Terminal(CommandHistory allCommandHistory) {
+        this.allCommandHistory = allCommandHistory;
     }
 
     public void setTerminalUI(TerminalUI terminalUI) {
@@ -147,8 +113,8 @@ public class Terminal {
                 date(args);
                 break;
 
-            case "clean":
-                clean(args);
+            case "clear":
+                clear(args);
                 break;
 
             case "exit":
@@ -265,7 +231,7 @@ public class Terminal {
                 "rm [file] - Removes a file\n" +
                 "cat [file] - Displays the contents of a file\n" +
                 "date - Prints date and time\n" +
-                "clean - Clears the window\n" +
+                "clear - Clears the window\n" +
                 "exit - Closes the terminal\n" +
                 "find [name/type] - Finds files by name or type\n" +
                 "df - Shows disk usage\n" +
@@ -403,7 +369,7 @@ public class Terminal {
         printToOutput(now.format(formatter));
     }
 
-    public void clean(ArrayList<String> args) {
+    public void clear(ArrayList<String> args) {
         if (textPane != null) {
             textPane.setText("");
         } else {
@@ -419,19 +385,18 @@ public class Terminal {
             System.exit(0);
         }
     }
-    
 
     public void find(ArrayList<String> args) {
         if (args.size() != 1) {
             printToOutput("Usage: find [name/type]");
             return;
         }
-    
-        final String pattern = args.get(0); 
-    
+
+        final String pattern = args.get(0);
+
         try {
-            final List<Path> result = new ArrayList<>(); 
-    
+            final List<Path> result = new ArrayList<>();
+
             if (pattern.startsWith(".")) {
                 Files.walkFileTree(Paths.get(currentDirectory), new SimpleFileVisitor<Path>() {
                     @Override
@@ -453,7 +418,7 @@ public class Terminal {
                     }
                 });
             }
-    
+
             if (result.isEmpty()) {
                 printToOutput("No matches found for: " + pattern);
             } else {
@@ -464,7 +429,7 @@ public class Terminal {
         } catch (IOException e) {
             printToOutput("Error finding files: " + e.getMessage());
         }
-    }    
+    }
 
     public void df() {
         File[] roots = File.listRoots();
@@ -508,53 +473,37 @@ public class Terminal {
         long minutes = (uptimeSeconds % 3600) / 60;
         long seconds = uptimeSeconds % 60;
 
-        printToOutput(String.format("Uptime: %d hours %d minutes %d seconds", hours, minutes, seconds));
+        printToOutput(String.format("Uptime: %d hours, %d minutes, %d seconds", hours, minutes, seconds));
     }
 
     public void whoami() {
-        String user = System.getProperty("user.name");
-        printToOutput("Current user: " + user);
+        String username = System.getProperty("user.name");
+        printToOutput("Current user: " + username);
     }
 
     public void ping(ArrayList<String> args) {
         if (args.size() != 1) {
-            printToOutput("Usage: ping [host]");
+            printToOutput("Usage: ping <hostname>");
             return;
         }
-
-        String host = args.get(0);
+        String hostname = args.get(0);
         try {
-            InetAddress address = InetAddress.getByName(host);
-            boolean reachable = address.isReachable(5000);
-            printToOutput(host + " is " + (reachable ? "reachable" : "unreachable"));
-        } catch (IOException e) {
-            printToOutput("Error pinging host: " + e.getMessage());
+            InetAddress inet = InetAddress.getByName(hostname);
+            printToOutput("Sending Ping Request to " + hostname);
+            if (inet.isReachable(5000)) {
+                printToOutput(hostname + " is reachable.");
+            } else {
+                printToOutput(hostname + " is NOT reachable.");
+            }
+        } catch (Exception e) {
+            printToOutput("Error: " + e.getMessage());
         }
     }
 
-    public void history(ArrayList<String> args) {
-        int limit = commandHistory.size(); 
-        int startIndex = 0;
-    
-        if (args.size() > 0) {
-            try {
-                limit = Integer.parseInt(args.get(0));
-            } catch (NumberFormatException e) {
-                printToOutput("Invalid argument for history. Please enter a number.");
-                return;
-            }
-        }
-    
-        if (args.size() > 1) {
-            printToOutput("Usage: history [limit]");
-            return;
-        }
-    
-        startIndex = Math.max(0, commandHistory.size() - limit); 
-    
-        for (int i = startIndex; i < commandHistory.size(); i++) {
-            printToOutput(i + 1 + ": " + commandHistory.get(i));
+    private void history(ArrayList<String> args) {
+        List<String> prev = allCommandHistory.getHistory();
+        for (int i = 0; i < prev.size(); i++) {
+            printToOutput((i + 1) + " " + prev.get(i));
         }
     }
-    
 }

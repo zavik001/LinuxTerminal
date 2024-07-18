@@ -4,30 +4,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandHistory {
-    private final List<String> history;
-    private int index;
+    private List<String> history;
+    private int historyIndex;
 
     public CommandHistory() {
         history = new ArrayList<>();
-        index = 0;
+        historyIndex = 0;  // Start with -1 to indicate no history yet
     }
 
     public void add(String command) {
         history.add(command);
-        index = history.size();
+        historyIndex = history.size();  // Reset index to the end of the list
     }
 
     public String getPreviousCommand() {
-        if (index > 0) {
-            index--;
+        if (history.isEmpty()) {
+            return "";
         }
-        return history.get(index);
+        historyIndex = Math.max(0, historyIndex - 1);
+        return history.get(historyIndex);
     }
 
     public String getNextCommand() {
-        if (index < history.size() - 1) {
-            index++;
+        if (history.isEmpty()) {
+            return "";
         }
-        return history.get(index);
+        historyIndex = Math.min(history.size() - 1, historyIndex + 1);
+        return history.get(historyIndex);
+    }
+
+    public List<String> getHistory() {
+        return history;
     }
 }

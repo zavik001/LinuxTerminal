@@ -22,8 +22,8 @@ public class TerminalUI {
     private CommandHistory commandHistory;
 
     public TerminalUI() {
-        terminal = new Terminal();
         commandHistory = new CommandHistory();
+        terminal = new Terminal(commandHistory);
 
         ImageIcon icon = new ImageIcon("resources/materials/linux.png");
 

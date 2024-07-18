@@ -1,23 +1,22 @@
 package com.example;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 public class Direction {
     private String commandName;
     private ArrayList<String> args;
 
     public boolean parse(String input) {
-        StringTokenizer tokenizer = new StringTokenizer(input);
-        if (tokenizer.hasMoreTokens()) {
-            commandName = tokenizer.nextToken();
-            args = new ArrayList<>();
-            while (tokenizer.hasMoreTokens()) {
-                args.add(tokenizer.nextToken());
-            }
-            return true;
+        String[] parts = input.split(" ");
+        if (parts.length == 0) {
+            return false;
         }
-        return false;
+        commandName = parts[0];
+        args = new ArrayList<>();
+        for (int i = 1; i < parts.length; i++) {
+            args.add(parts[i]);
+        }
+        return true;
     }
 
     public String getCommandName() {
