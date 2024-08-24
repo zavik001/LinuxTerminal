@@ -9,12 +9,12 @@ public class CommandHistory {
 
     public CommandHistory() {
         history = new ArrayList<>();
-        historyIndex = 0;  // Start with -1 to indicate no history yet
+        historyIndex = 0;  
     }
 
     public void add(String command) {
         history.add(command);
-        historyIndex = history.size();  // Reset index to the end of the list
+        historyIndex = history.size();  
     }
 
     public String getPreviousCommand() {
